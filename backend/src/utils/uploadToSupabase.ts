@@ -28,12 +28,15 @@ export const uploadToSupabase = async (
             throw new ApiError(500,`Supabase file upload error: ${error.message}`)
         }
 
-        const {data:{publicUrl}} = supabase.storage.from(bucketName).getPublicUrl(remotefilePath)
+        const {data:signedData,error:signError} = await supabase.storage.from(bucketName).createSignedUrl(remotefilePath,31536000)
+        if (signError) {
+            throw new ApiError(500, `Failed to create signed URL: ${signError.message}`);
+        }
         
         await fs.unlink(filePath)
 
         return{
-            publicUrl,
+            publicUrl:signedData.signedUrl,
             path:data.path
         }
     } catch (err) {
