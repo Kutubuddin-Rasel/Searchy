@@ -1,10 +1,13 @@
 import React from 'react'
+import Header from '../Header/Header'
 
 function Dashboard() {
   return (
-    <>
-    <h1 className='text-2xl text-white bg-amber-300 '>Welcome to dashboard</h1>
-    </>
+    <div className='w-full h-screen flex bg-gray-100'>
+      <div className='w-full'>
+      <Header />
+      </div>
+    </div>
   )
 }
 

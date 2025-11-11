@@ -5,6 +5,8 @@ import ApiResponse from "../utils/apiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { uploadToSupabase } from "../utils/uploadToSupabase.js";
 import { accessTokenOptions, refreshTokenOptions } from "../utils/cookieOptions.js";
+import jwt from "jsonwebtoken"
+import { junit } from "node:test/reporters";
 
 interface generatetokens {
   accessToken: string;
@@ -135,4 +137,42 @@ const logOut = asyncHandler(async (req, res) => {
     .json(ApiResponse.ok({}, "User logged out"));
 });
 
-export { registerUser, loginUser, logOut };
+interface refreshTokenPayload{
+  _id:string
+}
+
+const refreshToken = asyncHandler(async (req,res)=>{
+  const incomingRefreshToken = req.cookies.refreshToken
+  if(!incomingRefreshToken){
+    throw new ApiError(401,"Unauthorized request")
+  }
+
+  const decodeRefreshToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET as string) as refreshTokenPayload
+
+  const user = await User.findById(decodeRefreshToken._id)
+
+  if(!user){
+    throw new ApiError(401,"Invalid refresh token")
+  }
+
+  if(incomingRefreshToken != user?.refreshToken){
+    throw new ApiError(401,"Refresh token is expired or used")
+  }
+
+  const {accessToken,refreshToken} = await generateAccessRefreshToken(user._id)
+  
+  return res
+  .status(200)
+  .cookie("accessToken",accessToken,accessTokenOptions)
+  .cookie("refreshToken",refreshToken,refreshTokenOptions)
+  .json(
+    new ApiResponse(
+      200,
+      {accessToken,refreshToken},
+      "Access token refreshed"
+    )
+  )
+});
+
+export { registerUser, loginUser, logOut, refreshToken };
+

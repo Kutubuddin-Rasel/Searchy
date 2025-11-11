@@ -16,6 +16,7 @@ export default function Signup() {
 
   const [debouncedEmail] = useDebounce(email, 300);
   const navigate = useNavigate();
+
   useEffect(() => {
     const checkUniqueEmail = async () => {
       if (!debouncedEmail) {
@@ -27,12 +28,7 @@ export default function Signup() {
         setChekingEmail(true);
         setErrorMessage("");
         try {
-          const response = await axios.get(
-            "http://localhost:3000/api/v1/users/unique-email",
-            {
-              params: { email: debouncedEmail },
-            }
-          );
+          const response = await axios.get("/api/v1/users/unique-email",{params: { email: debouncedEmail }});
           console.log("AXIOS RESPONSE FROM SING-UP", response);
           setErrorMessage(response.data.message);
         } catch (error) {
@@ -87,7 +83,7 @@ export default function Signup() {
     formData.append("password",password);
     formData.append("avatar",avatar);
     try {
-      const response = await axios.post("http://localhost:3000/api/v1/users/register",formData,{withCredentials:true})
+      const response = await axios.post("/api/v1/users/register",formData,{withCredentials:true})
       
       console.log("Server response on register user",response.data);
       alert("Registration successful")
@@ -103,7 +99,7 @@ export default function Signup() {
     }
   }
   return (
-    <div className="w-full h-screen items-center justify-center bg-blue-400 flex">
+    <div className="w-full h-screen items-center justify-center bg-gray-100 flex">
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
         <h2 className="text-2xl font-bold mb-6 text-center"> Sign Up</h2>
         <form className="space-y-4" encType="multipart/form-data" method="post" onSubmit={handleSubmit}>
@@ -119,7 +115,7 @@ export default function Signup() {
             placeholder="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full border rounded px-3 py-1.5"
+            className="w-full border border-black/10 rounded px-3 py-1.5"
           />
           <div>
             {checkingEmail ? <span className="text-xs">Checking…</span> : null}
